@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Highly Scouted Show Big Board</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<h1>NFL Draft Board</h1>
+
+<input type="text" id="search" placeholder="Search player...">
+
+<select id="positionFilter">
+  <option value="">All Positions</option>
+  <option value="QB">QB</option>
+  <option value="RB">RB</option>
+  <option value="WR">WR</option>
+  <option value-"TE">TE</option>
+  <option value-"OT">OT</option>
+  <option value-"OG">OG</option>
+  <option value-"C">C</option>
+  <option value-"EDGE">EDGE</option>
+  <option value-"DT">DT</option>
+  <option value-"LB">LB</option>
+  <option value-"CB">CB</option>
+  <option value-"S">S</option>
+</select>
+
+<button onclick="addPlayer()">Add Prospect</button>
+
+<div id="playerList"></div>
+
+<script src="app.js"></script>
+</body>
+</html>
