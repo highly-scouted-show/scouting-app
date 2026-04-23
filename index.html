@@ -1,604 +1,651 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NFL Draft SPARQ Rankings</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title> The Highly Scouted Show</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-WMQ28Q30NG"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-WMQ28Q30NG');
-  </script>
+  :root {
+    --bg: #11192B;
+    --surface: #111318;
+    --surface2: #181c22;
+    --border: #1e232d;
+    --border2: #262c38;
+    --text: #e8edf5;
+    --muted: #6b7385;
+    --dim: #3a3f4d;
+    --accent: #d4a843;
+    --accent-dim: #2a2010;
+    --green: #3ecf6e;
+    --green-dim: #0d2a1a;
+    --red: #e05555;
+    --red-dim: #2a0e0e;
+    --blue: #5b9ef5;
+    --blue-dim: #0d1e35;
+  }
 
-  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/jquery.dataTables.min.css">
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background: #0f1117; color: #e8eaf0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 14px; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Barlow', sans-serif;
+    font-size: 14px;
+    min-height: 100vh;
+  }
 
-    /* ── Header ── */
-    header { padding: 20px 32px 14px; border-bottom: 1px solid #1e2130; }
-    .header-top { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
-    @media (max-width: 767px) {
-      header { padding: 14px 12px 10px; }
-      header h1 { font-size: 18px; }
-    }
-    header h1 { font-size: 22px; font-weight: 700; }
-    .header-tagline { color: #6a7090; font-size: 14px; font-style: italic; font-weight: 500; letter-spacing: 0.03em; margin-top: 4px; }
-    .zscore-explainer { background: #0d1020; border-top: 1px solid #1e2130; border-bottom: 1px solid #1e2130; color: #8a90a8; font-size: 13px; line-height: 1.7; padding: 14px 32px; }
-    @media (max-width: 767px) { .zscore-explainer { padding: 10px 12px; font-size: 12px; } }
-    .zscore-explainer strong { color: #c8cde0; }
-    .zscore-explainer .zscore-hl { display: inline-block; background: #141828; border: 1px solid #2a2e40; border-radius: 3px; font-family: 'SF Mono','Fira Code',monospace; font-size: 12px; padding: 1px 7px; margin: 0 2px; }
-    .zscore-explainer .hl-elite  { color: #4ade80; border-color: #2a4a2a; }
-    .zscore-explainer .hl-above  { color: #5ba3f5; border-color: #1e3a5f; }
-    .zscore-explainer .hl-avg    { color: #facc15; border-color: #3a3010; }
-    .zscore-explainer .hl-below  { color: #f87171; border-color: #4a2020; }
-    .zscore-explainer .hl-poor   { color: #9f1239; border-color: #3a1020; }
+  /* ── Header ── */
+  header {
+    padding: 28px 32px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .logo-block h1 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: 32px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    line-height: 1;
+  }
+  .logo-block h1 span { color: var(--accent); }
+  .logo-block p {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+  .header-meta { color: var(--muted); font-size: 12px; text-align: right; }
+  .header-meta strong { color: var(--text); }
 
-    .td-year { color: #7a7f94; font-size: 11px; font-variant-numeric: tabular-nums; }
+  /* ── Filters ── */
+  .filters {
+    padding: 14px 32px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    align-items: center;
+  }
+  .filter-group { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .filter-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+  .pill {
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: 3px;
+    color: var(--muted);
+    cursor: pointer;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    padding: 4px 10px;
+    transition: all 0.12s;
+    white-space: nowrap;
+  }
+  .pill:hover { border-color: var(--accent); color: var(--text); }
+  .pill.active { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
 
-    /* Select dropdowns (team single-select) */
-    .filter-group select {
-      background: #1a1d2a; border: 1px solid #2a2e40; border-radius: 4px;
-      color: #e8eaf0; font-size: 12px; outline: none; padding: 5px 8px;
-    }
-    .filter-group select:focus { border-color: #2e5a8f; }
-    select#team-select { min-width: 120px; }
+  .search-input {
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: 3px;
+    color: var(--text);
+    font-family: 'Barlow', sans-serif;
+    font-size: 12px;
+    outline: none;
+    padding: 5px 10px;
+    transition: border-color 0.12s;
+    width: 180px;
+  }
+  .search-input:focus { border-color: var(--accent); }
+  .search-input::placeholder { color: var(--dim); }
 
-    /* Banner */
-    .banner { background: #1c1a0a; border-bottom: 1px solid #3a3510; color: #c8b84a; font-size: 12px; padding: 8px 32px; }
-    @media (max-width: 767px) { .banner { padding: 7px 12px; } }
+  /* ── Table ── */
+  .table-wrap { padding: 0 32px 40px; overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; }
+  thead th {
+    background: var(--surface);
+    border-bottom: 2px solid var(--border2);
+    color: var(--muted);
+    cursor: pointer;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    padding: 10px 10px;
+    text-align: left;
+    text-transform: uppercase;
+    white-space: nowrap;
+    user-select: none;
+  }
+  thead th:hover { color: var(--text); }
+  thead th.sort-asc::after  { content: ' ▲'; color: var(--accent); font-size: 9px; }
+  thead th.sort-desc::after { content: ' ▼'; color: var(--accent); font-size: 9px; }
+  thead th.no-sort { cursor: default; }
+  thead th.no-sort:hover { color: var(--muted); }
 
-    /* ── Filters ── */
-    .filters { padding: 14px 32px; display: flex; flex-direction: column; gap: 6px; border-bottom: 1px solid #1e2130; }
-    @media (max-width: 767px) { .filters { padding: 10px 12px; gap: 6px; } }
+  tbody tr { border-bottom: 1px solid var(--border); transition: background 0.1s; }
+  tbody tr:hover { background: #14171d; }
+  tbody tr.expanded { background: #12151b; }
+  tbody td { padding: 10px 10px; vertical-align: top; font-variant-numeric: tabular-nums; }
 
-    /* Each filter row: label + scrollable pill strip */
-    .filter-row { display: flex; align-items: center; gap: 8px; min-width: 0; }
-    .filter-label { color: #7a7f94; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; flex-shrink: 0; width: 52px; }
-    .pill-strip {
-      display: flex; gap: 4px; align-items: center;
-      overflow-x: auto; -webkit-overflow-scrolling: touch;
-      scrollbar-width: none; /* Firefox */
-      padding-bottom: 2px; /* prevent clipping */
-      flex-wrap: nowrap;
-    }
-    .pill-strip::-webkit-scrollbar { display: none; }
+  .td-rank { color: var(--dim); font-size: 12px; font-variant-numeric: tabular-nums; width: 36px; }
 
-    /* On desktop, let position/round strips wrap */
-    @media (min-width: 768px) {
-      .filters { flex-direction: row; flex-wrap: wrap; gap: 10px; align-items: flex-start; }
-      .filter-row { align-items: flex-start; }
-      .filter-label { width: auto; margin-right: 4px; margin-top: 5px; }
-      .pill-strip { flex-wrap: wrap; overflow-x: visible; }
-      .pill-strip.pill-strip--scroll { flex-wrap: wrap; overflow-x: visible; max-width: none; }
-    }
+  .player-name {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 16px;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    transition: color 0.1s;
+  }
+  .player-name:hover { color: var(--accent); }
+  .player-school { color: var(--muted); font-size: 11px; margin-top: 1px; }
 
-    .pill { background: #1a1d2a; border: 1px solid #2a2e40; border-radius: 4px; color: #b0b4c8; cursor: pointer; font-size: 11px; padding: 4px 10px; transition: all 0.1s; white-space: nowrap; flex-shrink: 0; }
-    .pill:hover { background: #1e2235; color: #e8eaf0; }
-    .pill.active { background: #1e3a5f; border-color: #2e5a8f; color: #5ba3f5; }
+  .pos-badge {
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: 2px;
+    color: #8899bb;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    padding: 2px 6px;
+  }
 
-    /* Text inputs */
-    .filter-group { display: flex; align-items: center; gap: 4px; }
-    .filter-group input { background: #1a1d2a; border: 1px solid #2a2e40; border-radius: 4px; color: #e8eaf0; font-size: 12px; outline: none; padding: 5px 10px; width: 150px; }
-    .filter-group input:focus { border-color: #2e5a8f; }
-    @media (max-width: 767px) { .filter-group input { width: 100%; min-width: 0; } .filter-group { width: 100%; } }
+  .round-val {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 0.05em;
+  }
+  .round-badge {
+    background: #1a1506;
+    border: 1px solid #3a2e10;
+    border-radius: 2px;
+    color: #8a7030;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    padding: 1px 4px;
+    margin-left: 4px;
+    vertical-align: middle;
+  }
 
-    /* σ explainer — collapsible on mobile, always open on desktop */
-    .zscore-explainer { background: #0d1020; border-top: 1px solid #1e2130; border-bottom: 1px solid #1e2130; color: #8a90a8; font-size: 13px; line-height: 1.7; }
-    .zscore-toggle { display: none; }
-    /* Desktop: body always shown, inline padding */
-    .zscore-body { padding: 14px 32px; }
-    @media (max-width: 767px) {
-      .zscore-explainer { font-size: 12px; }
-      .zscore-toggle {
-        display: flex; align-items: center; justify-content: space-between;
-        padding: 10px 12px; cursor: pointer; color: #8a90a8; font-size: 12px; font-weight: 600;
-        user-select: none; border-bottom: 1px solid transparent;
-      }
-      .zscore-toggle.open { border-bottom-color: #1e2130; }
-      .zscore-toggle::after { content: '▼'; font-size: 9px; color: #4a4e60; transition: transform 0.2s; }
-      .zscore-toggle.open::after { transform: rotate(180deg); }
-      .zscore-body { display: none; padding: 10px 12px; }
-      .zscore-body.open { display: block; }
-    }
+  .team-name {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 0.05em;
+  }
 
-    /* ── Table ── */
-    .table-wrap { padding: 0 16px 32px; overflow-x: auto; }
-    table#sparq-table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
-    #sparq-table thead th { background: #141720; border-bottom: 2px solid #1e2130; color: #7a7f94; font-size: 11px; font-weight: 600; letter-spacing: 0.4px; padding: 10px 8px; text-align: left; text-transform: uppercase; white-space: nowrap; }
-    #sparq-table tbody tr { border-bottom: 1px solid #161820; }
-    #sparq-table tbody tr:hover { background: #14172080; }
-    #sparq-table td { padding: 8px; font-size: 13px; white-space: nowrap; vertical-align: top; }
+  .metric { font-size: 12px; font-family: 'Barlow Condensed', sans-serif; font-weight: 600; }
+  .metric-null { color: var(--dim); }
 
-    /* Table always shows all columns — wraps scroll on any size */
-    @media (max-width: 767px) {
-      .table-wrap { padding: 0 0 24px; }
-      .legend { padding: 10px 12px; }
-      .dataTables_wrapper .dataTables_info,
-      .dataTables_wrapper .dataTables_paginate,
-      .dataTables_wrapper .dataTables_length { padding: 6px 12px; }
-      #sparq-table td { padding: 6px 5px; font-size: 12px; }
-      #sparq-table thead th { padding: 8px 5px; }
-      .sigma-bar-bg { max-width: 60px; }
-    }
+  /* Notes expand row */
+  .notes-row td {
+    padding: 0;
+    border-bottom: 2px solid var(--accent);
+  }
+  .notes-inner {
+    padding: 14px 20px 16px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px;
+    animation: slideDown 0.18s ease;
+  }
+  @keyframes slideDown { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
 
-    .td-rank { color: #7a7f94; font-size: 12px; width: 36px; }
-    .player-name { font-weight: 600; }
-    .player-school { color: #7a7f94; font-size: 11px; margin-top: 1px; }
-    .pos-badge { background: #1a1d2a; border-radius: 3px; color: #8899bb; font-size: 10px; font-weight: 700; padding: 2px 5px; }
-    .pick-val { font-family: 'SF Mono', 'Fira Code', monospace; font-size: 12px; }
-    .pick-none { color: #3a3e50; }
-    .round-proj-badge { background: #1c2a1c; border: 1px solid #2a3e2a; border-radius: 3px; color: #4a7a4a; font-size: 9px; font-weight: 700; letter-spacing: 0.5px; padding: 1px 4px; vertical-align: middle; }
+  .notes-block h4 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .notes-block.strengths h4 { color: var(--green); }
+  .notes-block.weaknesses h4 { color: var(--red); }
+  .notes-block.notes h4 { color: var(--accent); }
+  .notes-block p { color: #a0a8bc; font-size: 12px; line-height: 1.6; }
+  .notes-block ul { color: #a0a8bc; font-size: 12px; line-height: 1.7; padding-left: 14px; }
+  .notes-block.strengths li::marker { color: var(--green); }
+  .notes-block.weaknesses li::marker { color: var(--red); }
 
-    /* σ bar (inside the sigma column — fills = NFL percentile) */
-    .sigma-bar-row { display: flex; align-items: center; gap: 6px; margin-top: 4px; }
-    .sigma-bar-bg { background: #1a1d2a; border-radius: 2px; flex: 1; max-width: 100px; height: 5px; overflow: hidden; }
-    .sigma-bar-fill { border-radius: 2px; height: 100%; transition: width 0.3s; }
-    .bar-elite  { background: #4ade80; }
-    .bar-above  { background: #5ba3f5; }
-    .bar-avg    { background: #facc15; }
-    .bar-below  { background: #f87171; }
-    .bar-poor   { background: #9f1239; }
-    .sparq-score-dim { color: #4a4e60; font-size: 10px; font-family: 'SF Mono', 'Fira Code', monospace; }
+  .expand-btn {
+    background: none;
+    border: none;
+    color: var(--dim);
+    cursor: pointer;
+    font-size: 14px;
+    padding: 2px 4px;
+    transition: color 0.1s;
+  }
+  .expand-btn:hover { color: var(--accent); }
+  .expand-btn.open { color: var(--accent); transform: rotate(90deg); }
 
-    /* σ / Z-score column — Option B: value + tier label */
-    .sigma-val { font-family: 'SF Mono', 'Fira Code', monospace; font-size: 14px; font-weight: 700; }
-    .sigma-tier { font-size: 9px; font-weight: 700; letter-spacing: 0.6px; text-transform: uppercase; margin-left: 5px; vertical-align: middle; }
-    .sigma-sub { color: #7a7f94; font-size: 11px; margin-top: 2px; }
-    .sigma-elite .sigma-val, .sigma-elite .sigma-tier { color: #4ade80; }
-    .sigma-above .sigma-val, .sigma-above .sigma-tier { color: #5ba3f5; }
-    .sigma-avg   .sigma-val, .sigma-avg   .sigma-tier { color: #facc15; }
-    .sigma-below .sigma-val, .sigma-below .sigma-tier { color: #f87171; }
-    .sigma-poor  .sigma-val, .sigma-poor  .sigma-tier { color: #9f1239; }
-    .sigma-none  .sigma-val { color: #4a4e60; }
+  /* Hidden rows */
+  .notes-row { display: none; }
+  .notes-row.visible { display: table-row; }
 
-    /* Metrics */
-    .metric-val { font-family: 'SF Mono', 'Fira Code', monospace; font-size: 12px; }
-    .metric-null { color: #3a3e50; }
-    sup.src-badge { color: #4a4e60; font-size: 9px; }
-    sup.src-badge.p     { color: #5ba3f5; }
-    sup.src-badge.tilde { color: #c8a24a; }
+  /* notes bar */
+  .notes-bar {
+    padding: 10px 32px;
+    border-bottom: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .notes-bar strong { color: var(--text); }
 
-    /* Sortable column headers */
-    #sparq-table thead th.sorting,
-    #sparq-table thead th.sorting_asc,
-    #sparq-table thead th.sorting_desc { cursor: pointer; }
-    #sparq-table thead th.sorting:hover { color: #b0b4c8; }
-    #sparq-table thead th.sorting_asc::after  { content: ' ▲'; color: #5ba3f5; font-size: 9px; }
-    #sparq-table thead th.sorting_desc::after { content: ' ▼'; color: #5ba3f5; font-size: 9px; }
+  /* Empty state */
+  .empty-row td {
+    text-align: center;
+    padding: 48px;
+    color: var(--muted);
+    font-style: italic;
+  }
 
-    /* DataTables overrides */
-    .dataTables_wrapper .dataTables_paginate .paginate_button { background: #1a1d2a !important; border: 1px solid #2a2e40 !important; border-radius: 3px !important; color: #b0b4c8 !important; font-size: 12px; }
-    .dataTables_wrapper .dataTables_paginate .paginate_button.current { background: #1e3a5f !important; border-color: #2e5a8f !important; color: #5ba3f5 !important; }
-    .dataTables_wrapper .dataTables_info { color: #7a7f94; font-size: 12px; padding: 8px 32px; }
-    .dataTables_wrapper .dataTables_paginate { padding: 8px 32px; }
-    .dataTables_wrapper .dataTables_length { padding: 8px 32px; color: #7a7f94; font-size: 12px; }
-    .dataTables_wrapper .dataTables_length select { background: #1a1d2a; border: 1px solid #2a2e40; border-radius: 4px; color: #e8eaf0; padding: 3px 6px; font-size: 12px; }
-    .dataTables_filter { display: none; }  /* we use our own player search */
-
-    .legend { padding: 12px 32px; color: #4a4e60; font-size: 11px; border-top: 1px solid #161820; }
-  </style>
+  @media (max-width: 767px) {
+    header { padding: 16px; }
+    .filters { padding: 10px 16px; }
+    .table-wrap { padding: 0 0 32px; }
+    .notes-inner { grid-template-columns: 1fr; }
+    .notes-bar { padding: 8px 16px; }
+  }
+</style>
 </head>
 <body>
 
 <header>
-  <div class="header-top">
-    <h1>NFL Draft — SPARQ Rankings</h1>
-    <p class="header-tagline">All Gas. No Film. Non-Athletes Denied.</p>
+  <div class="logo-block">
+    <h1>NFL <span>Draft</span> Scout</h1>
+    <p>2026 Prospect Rankings</p>
+  </div>
+  <div class="header-meta">
+    Click any player name to view<br>strengths, weaknesses &amp; notes
   </div>
 </header>
 
-<div class="banner" id="mock-banner">
-  ⚠ Round projections are based on consensus mock draft data and will be updated with actual picks after the draft (April 24–25, 2026).
-</div>
-
-<div class="zscore-explainer">
-  <div class="zscore-toggle" id="zscore-toggle"><strong>How it works</strong></div>
-  <div class="zscore-body" id="zscore-body">
-    Athleticism is the one thing you can't coach. SPARQ measures it. <strong>SPARQ</strong> is a composite athleticism score combining NFL Combine measurements — speed, explosion, strength, and agility — into a single number.
-    Each player is then ranked by <strong>σ (sigma)</strong>: how far above or below average they are <em>for their position</em>, relative to every NFL draftee since 1999.
-    <span class="zscore-hl hl-elite">+2σ ELITE</span> top ~2% of all-time.
-    <span class="zscore-hl hl-above">+1σ GREAT</span> top 16%.
-    <span class="zscore-hl hl-avg">0σ GOOD</span> top half.
-    <span class="zscore-hl hl-below">−1σ AVERAGE</span> historical median.
-    <span class="zscore-hl hl-poor">−2σ BELOW AVG</span> not a freak.
-    A +2σ OT and a +2σ WR are equally rare for their position.
-    &nbsp;·&nbsp; <a href="https://github.com/not-in-scope/nfl-sparq" target="_blank" rel="noopener" style="color:#5ba3f5;text-decoration:none">Methodology &amp; Source ↗</a>
-  </div>
-</div>
-
-<p id="subtitle" style="color:#7a7f94;font-size:12px;padding:8px 32px 0;margin:0">Loading...</p>
-
-<div class="filters" id="filters">
-  <button id="reset-filters" style="display:none">✕ Reset filters</button>
-  <div class="filter-row">
-    <span class="filter-label">Year</span>
-    <div class="pill-strip pill-strip--scroll" id="year-pills"><!-- populated by JS --></div>
-  </div>
-
-  <div class="filter-row">
+<div class="filters">
+  <div class="filter-group">
     <span class="filter-label">Pos</span>
-    <div class="pill-strip">
-      <button class="pill active" data-filter="pos" data-value="all">All</button>
-      <button class="pill" data-filter="pos" data-value="QB">QB</button>
-      <button class="pill" data-filter="pos" data-value="RB">RB</button>
-      <button class="pill" data-filter="pos" data-value="WR">WR</button>
-      <button class="pill" data-filter="pos" data-value="TE">TE</button>
-      <button class="pill" data-filter="pos" data-value="OT">OT</button>
-      <button class="pill" data-filter="pos" data-value="OG,C,OL">OG/C</button>
-      <button class="pill" data-filter="pos" data-value="EDGE,DL">EDGE</button>
-      <button class="pill" data-filter="pos" data-value="DT">DT</button>
-      <button class="pill" data-filter="pos" data-value="LB">LB</button>
-      <button class="pill" data-filter="pos" data-value="CB">CB</button>
-      <button class="pill" data-filter="pos" data-value="S,FS,SS,DB">S/DB</button>
-      <button class="pill" data-filter="pos" data-value="K/P">K/P</button>
-    </div>
+    <button class="pill active" data-filter="pos" data-value="all">All</button>
+    <button class="pill" data-filter="pos" data-value="QB">QB</button>
+    <button class="pill" data-filter="pos" data-value="RB">RB</button>
+    <button class="pill" data-filter="pos" data-value="WR">WR</button>
+    <button class="pill" data-filter="pos" data-value="TE">TE</button>
+    <button class="pill" data-filter="pos" data-value="OT">OT</button>
+    <button class="pill" data-filter="pos" data-value="OG">OG</button>
+    <button class="pill" data-filter="pos" data-value="C">C</button>
+    <button class="pill" data-filter="pos" data-value="EDGE">EDGE</button>
+    <button class="pill" data-filter="pos" data-value="DT">DT</button>
+    <button class="pill" data-filter="pos" data-value="LB">LB</button>
+    <button class="pill" data-filter="pos" data-value="CB">CB</button>
+    <button class="pill" data-filter="pos" data-value="S">S</button>
   </div>
 
-  <div class="filter-row">
-    <span class="filter-label">Round</span>
-    <div class="pill-strip">
-      <button class="pill active" data-filter="round" data-value="all">All</button>
-      <button class="pill" data-filter="round" data-value="1">Day 1 (R1)</button>
-      <button class="pill" data-filter="round" data-value="2-3">Day 2 (R2–3)</button>
-      <button class="pill" data-filter="round" data-value="4-7">Day 3 (R4–7)</button>
-      <button class="pill" data-filter="round" data-value="undrafted">UDFA</button>
-    </div>
+  <div class="filter-group">
+    <span class="filter-label">Search</span>
+    <input class="search-input" id="player-search" placeholder="Player or school...">
   </div>
+</div>
 
-  <div class="filter-row">
-    <span class="filter-label">Data</span>
-    <div class="pill-strip">
-      <button class="pill active" data-filter="data" data-value="all">All</button>
-      <button class="pill" data-filter="data" data-value="real">All Measured</button>
-      <button class="pill" data-filter="data" data-value="estimated">Some Estimated</button>
-      <button class="pill" data-filter="data" data-value="none">No SPARQ</button>
-    </div>
-  </div>
-
-  <div class="filter-row">
-    <span class="filter-label">Team</span>
-    <select id="team-select"><option value="">All teams</option></select>
-    &nbsp;
-    <span class="filter-label" style="margin-left:8px">School</span>
-    <input type="text" id="school-filter" placeholder="Filter school...">
-    &nbsp;
-    <span class="filter-label" style="margin-left:8px">Player</span>
-    <input type="text" id="player-search" placeholder="Search player...">
-  </div>
+<div class="notes-bar">
+  <span id="notes-text">Loading...</span>
 </div>
 
 <div class="table-wrap">
-  <table id="sparq-table">
+  <table id="main-table">
     <thead>
       <tr>
-        <th>#</th>
-        <th>Year</th>
-        <th>Player</th>
-        <th>Pos</th>
-        <th>Round</th>
-        <th>Team</th>
-        <th>σ / NFL%</th>
-        <th>Ht</th><th>Wt</th><th>40yd</th><th>10s</th>
-        <th>Vert</th><th>Broad</th><th>Bench</th>
-        <th>3-Cone</th><th>Shuttle</th>
+        <th class="no-sort">#</th>
+        <th data-col="name">Player</th>
+        <th data-col="pos">Pos</th>
+        <th data-col="grade">Grade</th>
+        <th data-col="value">Value</th>
+        <th data-col="con">Con></th>
+        <th data-col="ht">Ht</th>
+        <th data-col="wt">Wt</th>
+        <th class="no-sort">Notes</th>
       </tr>
     </thead>
-    <tbody id="table-body"></tbody>
+    <tbody id="tbody"></tbody>
   </table>
 </div>
 
-<div class="legend">
-  C = combine &nbsp;·&nbsp;
-  <sup class="src-badge p" style="position:static">P</sup> = pro day &nbsp;·&nbsp;
-  <sup class="src-badge tilde" style="position:static">~</sup> = estimated &nbsp;·&nbsp;
-  <span class="round-proj-badge" style="position:static">PROJ</span> = projected round (pre-draft) &nbsp;·&nbsp;
-  σ = std deviations vs historical NFL positional average &nbsp;·&nbsp;
-  "All Measured" = all 8 inputs from combine/pro day
-</div>
-
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
 <script>
-(function () {
-  'use strict';
+// ── DATA ──────────────────────────────────────────────────────────────────────
+// Edit this array to add your own prospects.
+// draft_round: 1-7, or null for UDFA
+// draft_pick: pick number within the round (optional)
+// round_proj: true = projected (pre-draft), false = actual
+// ht: height in inches (e.g. 74 = 6'2")
+// wt: weight in lbs
+// strengths/weaknesses: arrays of bullet strings
+// notes: free text scouting note
 
-  let allProspects = [];
-  let dt;
-  const activeFilters = { pos: 'all', round: 'all', data: 'all' };
-  let schoolFilter = '', teamFilter = '';
+const PROSPECTS = [
+  {
+    id: 1,
+    name: "Jeremiyah Love",
+    school: "Notre Dame",
+    pos: "RB",
+    grade: "9.20",
+    value: "Top 10"
+    ht: 72, wt: 212,
+    strengths: ["Excellent agility to cut upfield when he finds the gap in outside zone", "Beautiful contact balance that allows Love to keep moving even when tripped up or hit in his lower half", "Great leg drive to keep moving when guys get on top of him, consistently finds a way to fall forward"],
+    weaknesses: ["Lighter frame could potentially lead to injuries at the next level", "Not a great pass blocker, will definitely struggle with this aspect of the game at the next level"],
+    notes: "Top-rated QB in a weak class. High ceiling but will need a stable offensive system around him early. Titans coaching staff believes he's NFL-ready Day 1."
+  },
+  {
+    id: 2,
+    name: "Travis Hunter",
+    school: "Colorado",
+    pos: "CB",
+    team: "Cleveland Browns",
+    draft_round: 1, draft_pick: 2, round_proj: false,
+    ht: 72, wt: 185,
+    strengths: ["Two-way threat — elite CB and WR at college level", "Elite ball skills and contested catch ability", "Explosive twitch and recovery speed"],
+    weaknesses: ["NFL teams must decide: CB or WR?", "Size concerns versus bigger NFL receivers", "Durability questions over a full 17-game season"],
+    notes: "Arguably the most unique prospect in years. The Browns selected him as a CB with WR packages. Historic combine measurables at his position."
+  },
+  {
+    id: 3,
+    name: "Abdul Carter",
+    school: "Penn State",
+    pos: "EDGE",
+    team: "New York Giants",
+    draft_round: 1, draft_pick: 3, round_proj: false,
+    ht: 75, wt: 247,
+    strengths: ["Relentless motor and elite get-off", "Advanced pass-rush plan with multiple counters", "Versatile — can rush from multiple alignments"],
+    weaknesses: ["Run defense needs refinement vs. bigger guards", "Pad level inconsistency in college film", "Limited sample at true EDGE (moved from LB)"],
+    notes: "Giants desperately needed a pass rusher and got the best one in the draft. His upside is a perennial Pro Bowler if the run-defense details are cleaned up."
+  },
+  {
+    id: 4,
+    name: "Will Campbell",
+    school: "LSU",
+    pos: "OT",
+    team: "New England Patriots",
+    draft_round: 1, draft_pick: 4, round_proj: false,
+    ht: 78, wt: 314,
+    strengths: ["Exceptional footwork and balance for the position", "Polished pass-set technique, rarely overextends", "Handles speed-to-power well against elite edge rushers"],
+    weaknesses: ["Arm length slightly below ideal NFL threshold", "Needs to add functional strength in run game", "Limited against true bull-rush specialists"],
+    notes: "Patriots rebuild their OL around a lineman who was the most technically sound in the class. Long-term franchise LT if arm-length concerns prove unfounded."
+  },
+  {
+    id: 5,
+    name: "Ashton Jeanty",
+    school: "Boise State",
+    pos: "RB",
+    team: "Las Vegas Raiders",
+    draft_round: 1, draft_pick: 6, round_proj: false,
+    ht: 69, wt: 214,
+    strengths: ["Heisman-caliber vision and burst through the hole", "Exceptional contact balance — rarely goes down first contact", "Legitimate receiving threat out of the backfield"],
+    weaknesses: ["Competition level concerns from Mountain West", "Compact frame limits ability to absorb 300+ carry seasons", "Pass protection technique is raw"],
+    notes: "Best RB prospect since Saquon Barkley in terms of tape dominance. The Heisman race wasn't close. Raiders get a potential franchise RB."
+  },
+  {
+    id: 6,
+    name: "Mason Graham",
+    school: "Michigan",
+    pos: "DT",
+    team: "Cleveland Browns",
+    draft_round: 1, draft_pick: 5, round_proj: false,
+    ht: 75, wt: 315,
+    strengths: ["Explosive first step for his size", "Excellent hand technique — swim and rip moves", "High-motor player, consistent effort in run defense"],
+    weaknesses: ["Sack production understated vs. elite interior rushers", "Gets washed out in long-yardage run situations at times", "NFL trajectory: dominant vs. run, average vs. pass?"],
+    notes: "Arguably the safest pick in the top 10. Pure nose tackle/3-tech who was unblockable in Big Ten play. Floor is starter, ceiling is Pro Bowl."
+  },
+  {
+    id: 7,
+    name: "Luther Burden III",
+    school: "Missouri",
+    pos: "WR",
+    team: "Chicago Bears",
+    draft_round: 1, draft_pick: 10, round_proj: false,
+    ht: 71, wt: 208,
+    strengths: ["Elite short-area quickness and YAC ability", "Polished route runner with NFL-ready releases", "Reliable hands in contested-catch situations"],
+    weaknesses: ["Doesn't have elite top-end speed (4.52 40)", "Scheme fit matters — best in spacing offenses", "Production dipped in 2025 with QB instability"],
+    notes: "The most NFL-ready WR in the class despite not being the most athletic. Caleb Williams gets a legitimate weapon in Chicago's rebuild."
+  },
+  {
+    id: 8,
+    name: "Kelvin Banks Jr.",
+    school: "Texas",
+    pos: "OT",
+    team: "New York Jets",
+    draft_round: 1, draft_pick: 7, round_proj: false,
+    ht: 77, wt: 314,
+    strengths: ["Outstanding anchor strength against power rushers", "Smart and assignment-sound — rarely beaten twice", "Three-year starter at elite competition level"],
+    weaknesses: ["Lateral agility is a question mark vs. speed edge rushers", "Can get top-heavy in space on screen plays", "Needs to win more consistently with hands inside"],
+    notes: "Jets needed O-line help desperately. Banks is a safe, high-floor LT who likely develops into a 10-year starter. Won't wow you but won't beat you either."
+  },
+  {
+    id: 9,
+    name: "Tetairoa McMillan",
+    school: "Arizona",
+    pos: "WR",
+    team: "Carolina Panthers",
+    draft_round: 1, draft_pick: 8, round_proj: false,
+    ht: 76, wt: 219,
+    strengths: ["Elite size-speed combination (6'4\", sub-4.4)", "Dominant in the red zone and on contested catches", "Advanced footwork in route running for his size"],
+    weaknesses: ["Separation ability against press corners is inconsistent", "Needs improvement in the intermediate route tree", "Limited YAC despite measurables"],
+    notes: "The Panthers finally add a legitimate WR1 target for Bryce Young. McMillan's ceiling is Josh Gordon-level if he refines his route running."
+  },
+  {
+    id: 10,
+    name: "Shedeur Sanders",
+    school: "Colorado",
+    pos: "QB",
+    team: "Cleveland Browns",
+    draft_round: 1, draft_pick: 12, round_proj: false,
+    ht: 73, wt: 215,
+    strengths: ["Elite pocket management and pressure performance", "High-accuracy thrower — 74.0% completion rate in 2025", "Strong leadership presence and football IQ"],
+    weaknesses: ["Arm strength is average for an NFL starter", "Operating behind a historically bad OL inflated 'pressure' stats", "Proving he can perform without father/coaching staff nearby"],
+    notes: "Slid further than most expected on draft night. Browns land a potential franchise QB at a great value pick. High floor, debated ceiling."
+  },
+  {
+    id: 11,
+    name: "Mykel Williams",
+    school: "Georgia",
+    pos: "EDGE",
+    team: "San Francisco 49ers",
+    draft_round: 1, draft_pick: 11, round_proj: false,
+    ht: 77, wt: 260,
+    strengths: ["Elite athleticism — rare speed-power combo at 260 lbs", "High-upside pass rusher with great length", "Scheme versatile — can play 3-4 or 4-3 EDGE"],
+    weaknesses: ["Pass-rush plan is underdeveloped — too reliant on athleticism", "Production didn't always match physical tools in college", "Needs NFL coaching to maximize technique"],
+    notes: "49ers stay aggressive adding a potential star pass rusher. Williams is more of a projection than Carter/Graham but the upside is sky-high. Kyle Shanahan loves upside."
+  },
+  {
+    id: 12,
+    name: "Emeka Egbuka",
+    school: "Ohio State",
+    pos: "WR",
+    team: "Tampa Bay Buccaneers",
+    draft_round: 1, draft_pick: 19, round_proj: false,
+    ht: 72, wt: 205,
+    strengths: ["Crisp, precise route runner — elite timing with QBs", "Versatile — can play in the slot or outside", "Strong hands, reliable in traffic"],
+    weaknesses: ["Lacks elite separation speed at the top of routes", "Not a significant YAC threat after the catch", "Overshadowed by receiver depth at Ohio State for two seasons"],
+    notes: "Baker Mayfield gets a polished, reliable target. Egbuka is the definition of a pro's pro — won't blow up the stat sheet Week 1 but will be a 1,000-yard receiver by Year 2."
+  }
+];
 
-  // Years with available data
-  const AVAILABLE_YEARS = new Set(['2010', '2011', '2012', '2013', '2014', '2015', '2016', '2017', '2018', '2019', '2020', '2021', '2022', '2023', '2024', '2025', '2026']);
-  const ALL_YEARS = Array.from({ length: 17 }, (_, i) => String(2026 - i)); // 2026→2010
+// ── STATE ──────────────────────────────────────────────────────────────────────
+const filters = { pos: 'all' };
+let searchQuery = '';
+let sortCol = null;
+let sortDir = 'asc';
+let expandedId = null;
 
-  // σ explainer toggle (mobile only — CSS shows the toggle button only on small screens)
-  document.getElementById('zscore-toggle').addEventListener('click', function() {
-    this.classList.toggle('open');
-    document.getElementById('zscore-body').classList.toggle('open');
-  });
+// ── HELPERS ────────────────────────────────────────────────────────────────────
+function fmtHt(inches) {
+  if (inches == null) return '—';
+  return `${Math.floor(inches / 12)}'${inches % 12}"`;
+}
 
-  // Build year toggle pills (multi-select — click to toggle, any combo allowed)
-  const selectedYears = new Set(['2026']);
-  const yearPillsEl = document.getElementById('year-pills');
-  ALL_YEARS.forEach(yr => {
-    if (!AVAILABLE_YEARS.has(yr)) return;
-    const btn = document.createElement('button');
-    btn.className = 'pill year-pill' + (yr === '2026' ? ' active' : '');
-    btn.textContent = yr;
-    btn.dataset.year = yr;
-    btn.addEventListener('click', () => {
-      if (selectedYears.has(yr) && selectedYears.size === 1) return; // keep at least one
-      if (selectedYears.has(yr)) {
-        selectedYears.delete(yr);
-        btn.classList.remove('active');
-      } else {
-        selectedYears.add(yr);
-        btn.classList.add('active');
-      }
-      reloadData();
+function sortKey(p, col) {
+  if (col === 'name')  return p.name.toLowerCase();
+  if (col === 'pos')   return p.pos;
+  if (col === 'grade') return p.grade;
+  if (col === 'value') return p.value();
+  if (col === 'ht')    return p.ht ?? -1;
+  if (col === 'wt')    return p.wt ?? -1;
+  return 0;
+}
+
+function passes(p) {
+  const posOk = filters.pos === 'all' || p.pos === filters.pos;
+  const q = searchQuery.toLowerCase();
+  const searchOk = !q || p.name.toLowerCase().includes(q) || (p.school || '').toLowerCase().includes(q);
+  return posOk && roundOk && searchOk;
+}
+
+// ── RENDER ─────────────────────────────────────────────────────────────────────
+function render() {
+  let data = PROSPECTS.filter(passes);
+
+  if (sortCol) {
+    data.sort((a, b) => {
+      const ka = sortKey(a, sortCol), kb = sortKey(b, sortCol);
+      if (ka < kb) return sortDir === 'asc' ? -1 : 1;
+      if (ka > kb) return sortDir === 'asc' ? 1 : -1;
+      return 0;
     });
-    yearPillsEl.appendChild(btn);
-  });
-
-  function getSelectedYears() {
-    return [...selectedYears];
   }
 
-  function reloadData() {
-    const years = getSelectedYears();
-    const loads = years.map(yr =>
-      fetch(`data/prospects_${yr}.json`).then(r => r.json()).then(d =>
-        d.prospects.map(p => ({ ...p, year: yr }))
-      ).catch(() => [])
-    );
-    Promise.all(loads).then(groups => {
-      allProspects = groups.flat();
-      allProspects.sort((a, b) => (a.z_score === null) - (b.z_score === null) || (b.z_score || 0) - (a.z_score || 0));
-      if (dt) dt.destroy();  // destroy BEFORE replacing tbody (avoids DOM restoration overwriting new rows)
-      document.getElementById('table-body').innerHTML = allProspects.map(p => renderRow(p)).join('');
-      document.getElementById('subtitle').textContent =
-        `${allProspects.length} prospects · ${years.sort().join(', ')}`;
-      rebuildTeamSelect();
-      dt = initDT();
-      dt.draw();
-    });
+  document.getElementById('notes-text').innerHTML =
+    `<strong>${data.length}</strong> of ${PROSPECTS.length} prospects`;
+
+  const tbody = document.getElementById('tbody');
+  tbody.innerHTML = '';
+
+  if (data.length === 0) {
+    tbody.innerHTML = '<tr class="empty-row"><td colspan="8">No prospects match your filters.</td></tr>';
+    return;
   }
 
-  function rebuildTeamSelect() {
-    const sel = document.getElementById('team-select');
-    const prev = sel.value;
-    // Collect unique non-null teams sorted alphabetically
-    const teams = [...new Set(allProspects.map(p => p.team).filter(Boolean))].sort();
-    sel.innerHTML = '<option value="">All teams</option>';
-    teams.forEach(t => {
-      const opt = document.createElement('option');
-      opt.value = t;
-      opt.textContent = t;
-      if (t === prev) opt.selected = true;
-      sel.appendChild(opt);
-    });
-    teamFilter = sel.value;
-  }
+  data.forEach((p, i) => {
+    const isOpen = expandedId === p.id;
 
-  // Overall pick → within-round pick offset
-  const ROUND_STARTS = { 1: 0, 2: 32, 3: 64, 4: 96, 5: 128, 6: 192, 7: 224 };
-
-  // ── Helpers ──────────────────────────────────────────────────────────────
-
-  function srcBadge(source) {
-    if (source === 'pro_day')   return '<sup class="src-badge p">P</sup>';
-    if (source === 'estimated') return '<sup class="src-badge tilde">~</sup>';
-    return '';
-  }
-
-  function fmtMetric(m, dec) {
-    if (!m || m.value === null || m.value === undefined)
-      return '<span class="metric-val metric-null">—</span>';
-    return `<span class="metric-val">${Number(m.value).toFixed(dec)}${srcBadge(m.source)}</span>`;
-  }
-
-  function fmtBroad(m) {
-    if (!m || m.value === null || m.value === undefined)
-      return '<span class="metric-val metric-null">—</span>';
-    const total = Math.round(m.value);
-    const feet = Math.floor(total / 12);
-    const inches = total % 12;
-    return `<span class="metric-val">${feet}'${inches}"${srcBadge(m.source)}</span>`;
-  }
-
-  function sigmaBarClass(cls) {
-    if (cls === 'sigma-elite') return 'bar-elite';
-    if (cls === 'sigma-above') return 'bar-above';
-    if (cls === 'sigma-avg')   return 'bar-avg';
-    if (cls === 'sigma-below') return 'bar-below';
-    return 'bar-poor';
-  }
-
-  function sigmaTierInfo(z) {
-    if (z === null || z === undefined) return { cls: 'sigma-none',  tier: '' };
-    if (z >= 2.0)  return { cls: 'sigma-elite', tier: 'ELITE' };
-    if (z >= 1.0)  return { cls: 'sigma-above', tier: 'GREAT' };
-    if (z >= 0.0)  return { cls: 'sigma-avg',   tier: 'GOOD' };
-    if (z >= -1.0) return { cls: 'sigma-below',  tier: 'AVERAGE' };
-    if (z >= -2.0) return { cls: 'sigma-poor',   tier: 'BELOW AVG' };
-    return               { cls: 'sigma-poor',   tier: 'POOR' };
-  }
-
-  // ── Renderers ─────────────────────────────────────────────────────────────
-
-  // σ column: σ value + tier + bar (fills = NFL percentile) + small SPARQ
-  function renderSigma(p) {
-    if (p.z_score === null || p.z_score === undefined)
-      return '<div class="sigma-none"><span class="sigma-val">—</span></div>';
-    const sign = p.z_score >= 0 ? '+' : '';
-    const { cls, tier } = sigmaTierInfo(p.z_score);
-    const barPct  = p.nfl_pct !== null ? p.nfl_pct.toFixed(1) : 0;
-    const barCls  = sigmaBarClass(cls);
-    const nflLine = p.nfl_pct !== null
-      ? `<div class="sigma-bar-row">
-           <div class="sigma-bar-bg"><div class="sigma-bar-fill ${barCls}" style="width:${barPct}%"></div></div>
-           <span class="sigma-sub">${p.nfl_pct.toFixed(1)}%</span>
-         </div>` : '';
-    const sparqLine = p.sparq !== null
-      ? `<span class="sparq-score-dim">SPARQ ${p.sparq.toFixed(1)}</span>` : '';
-    return `<div class="${cls}">
-      <span class="sigma-val">${sign}${p.z_score.toFixed(2)}σ</span><span class="sigma-tier">${tier}</span>
-      ${nflLine}
-      ${sparqLine}
-    </div>`;
-  }
-
-  function renderHeight(h) {
-    if (h === null || h === undefined)
-      return '<span class="metric-val metric-null">—</span>';
-    const total = Math.round(h);   // round to nearest inch
-    const feet = Math.floor(total / 12);
-    const inches = total % 12;
-    return `<span class="metric-val">${feet}'${inches}"</span>`;
-  }
-
-  function renderRound(p) {
-    if (!p.draft_round) return '<span style="color:#3a3e50">—</span>';
-    const within = p.draft_pick || '?';
-    const badge  = p.round_source === 'mock'
-      ? ' <span class="round-proj-badge">PROJ</span>'
-      : '';
-    return `<span class="pick-val">R${p.draft_round}.${within}</span>${badge}`;
-  }
-
-  function renderTeam(p) {
-    if (!p.team) return '<span style="color:#3a3e50">—</span>';
-    return `<strong style="font-size:12px">${p.team}</strong>`;
-  }
-
-  function renderRow(p) {
-    const m = p.metrics;
-    return `<tr data-pos="${p.pos}"
-               data-year="${p.year || ''}"
-               data-round="${p.draft_round || 'none'}"
-               data-sparq-src="${p.sparq_source || 'none'}"
-               data-school="${(p.school || '').toLowerCase()}"
-               data-team="${(p.team  || '').toLowerCase()}">
-      <td class="td-rank">${p.rank}</td>
-      <td class="td-year">${p.year || ''}</td>
-      <td><div class="player-name">${p.name}</div><div class="player-school">${p.school}</div></td>
+    // Main row
+    const tr = document.createElement('tr');
+    if (isOpen) tr.classList.add('expanded');
+    tr.innerHTML = `
+      <td class="td-rank">${i + 1}</td>
+      <td>
+        <div class="player-name" data-id="${p.id}">${p.name}</div>
+        <div class="player-school">${p.school}</div>
+      </td>
       <td><span class="pos-badge">${p.pos}</span></td>
-      <td data-order="${p.draft_round != null ? p.draft_round * 1000 + (p.draft_pick ?? 999) : 9999999}">${renderRound(p)}</td>
-      <td>${renderTeam(p)}</td>
-      <td data-order="${p.z_score ?? -99}">${renderSigma(p)}</td>
-      <td data-order="${p.height ?? -1}">${renderHeight(p.height)}</td>
-      <td data-order="${m.weight?.value ?? -1}">${fmtMetric(m.weight, 0)}</td>
-      <td data-order="${m.forty?.value ?? 99}">${fmtMetric(m.forty, 2)}</td>
-      <td data-order="${m.ten_split?.value ?? 99}">${fmtMetric(m.ten_split, 2)}</td>
-      <td data-order="${m.vertical?.value ?? -1}">${fmtMetric(m.vertical, 1)}</td>
-      <td data-order="${m.broad?.value ?? -1}">${fmtBroad(m.broad)}</td>
-      <td data-order="${m.bench?.value ?? -1}">${fmtMetric(m.bench, 0)}</td>
-      <td data-order="${m.cone?.value ?? 99}">${fmtMetric(m.cone, 2)}</td>
-      <td data-order="${m.shuttle?.value ?? 99}">${fmtMetric(m.shuttle, 2)}</td>
-    </tr>`;
-  }
+      <td>${gradeLabel(p)}</td>
+      <td><span class="value">${p.team || '<span style="color:#3a3f4d">—</span>'}</span></td>
+      <td><span class="metric">${fmtHt(p.ht)}</span></td>
+      <td><span class="metric">${p.wt != null ? p.wt + ' lbs' : '<span class="metric-null">—</span>'}</span></td>
+      <td><button class="expand-btn ${isOpen ? 'open' : ''}" data-id="${p.id}" title="Toggle notes">▶</button></td>
+    `;
+    tbody.appendChild(tr);
 
-  // ── DataTables custom row filter ──────────────────────────────────────────
-  // Registered once globally; applies to every DataTable draw.
+    // Notes row
+    const ntr = document.createElement('tr');
+    ntr.classList.add('notes-row');
+    if (isOpen) ntr.classList.add('visible');
 
-  $.fn.dataTable.ext.search.push(function (settings, _rowData, rowIdx) {
-    const rowNode = settings.aoData[rowIdx] && settings.aoData[rowIdx].nTr;
-    if (!rowNode) return true;
-    const pos    = rowNode.getAttribute('data-pos')       || '';
-    const round  = rowNode.getAttribute('data-round')     || 'none';
-    const src    = rowNode.getAttribute('data-sparq-src') || 'none';
-    const school = rowNode.getAttribute('data-school')    || '';
-    const team   = rowNode.getAttribute('data-team')      || '';
-    const f      = activeFilters;
+    const strengthsHtml = (p.strengths || []).map(s => `<li>${s}</li>`).join('');
+    const weaknessesHtml = (p.weaknesses || []).map(w => `<li>${w}</li>`).join('');
+    const notesHtml = p.notes || '<span style="color:#4a5060">No notes recorded.</span>';
 
-    if (f.pos !== 'all' && !f.pos.split(',').includes(pos)) return false;
-
-    if (f.round !== 'all') {
-      const r = parseInt(round);
-      if      (f.round === 'undrafted' && round !== 'none') return false;
-      else if (f.round === '1'   && r !== 1)                return false;
-      else if (f.round === '2-3' && (r < 2 || r > 3))      return false;
-      else if (f.round === '4-7' && (r < 4 || r > 7))      return false;
-    }
-
-    if (f.data !== 'all') {
-      if (f.data === 'real'      && src !== 'real')      return false;
-      if (f.data === 'estimated' && src !== 'estimated') return false;
-      if (f.data === 'none'      && src !== 'none')      return false;
-    }
-
-    if (schoolFilter && !school.includes(schoolFilter)) return false;
-    if (teamFilter   && team !== teamFilter.toLowerCase()) return false;
-
-    return true;
+    ntr.innerHTML = `<td colspan="8">
+      <div class="notes-inner">
+        <div class="notes-block strengths">
+          <h4>Strengths</h4>
+          <ul>${strengthsHtml || '<li style="color:#3a3f4d">None listed</li>'}</ul>
+        </div>
+        <div class="notes-block weaknesses">
+          <h4>Weaknesses</h4>
+          <ul>${weaknessesHtml || '<li style="color:#3a3f4d">None listed</li>'}</ul>
+        </div>
+        <div class="notes-block notes">
+          <h4>Scout Notes</h4>
+          <p>${notesHtml}</p>
+        </div>
+      </div>
+    </td>`;
+    tbody.appendChild(ntr);
   });
 
-  // ── DataTable init ────────────────────────────────────────────────────────
-
-  function initDT() {
-    return $('#sparq-table').DataTable({
-      paging:     true,
-      pageLength: 100,
-      lengthMenu: [[50, 100, 250, -1], ['50', '100', '250', 'All']],
-      searching:  true,
-      ordering:   true,
-      order:      [[6, 'desc']],   // default: sort by σ descending (column index 6)
-      info:       true,
-      dom:        'ltip',
-      columnDefs: [
-        { orderable: false, targets: [2] },  // Player name col (school subtext skews sort)
-        { type: 'num', targets: '_all' },
-      ],
+  // Event delegation for expand buttons and player names
+  tbody.querySelectorAll('[data-id]').forEach(el => {
+    el.addEventListener('click', () => {
+      const id = parseInt(el.dataset.id);
+      expandedId = expandedId === id ? null : id;
+      render();
     });
-  }
+  });
 
-  function wireFilters() {
-    document.querySelectorAll('.pill[data-filter]').forEach(pill => {
-      pill.addEventListener('click', () => {
-        const type = pill.dataset.filter;
-        document.querySelectorAll(`.pill[data-filter="${type}"]`)
-          .forEach(p => p.classList.remove('active'));
-        pill.classList.add('active');
-        activeFilters[type] = pill.dataset.value;
-        dt.draw();
-      });
-    });
+  // Column sort headers
+  document.querySelectorAll('thead th[data-col]').forEach(th => {
+    th.classList.remove('sort-asc', 'sort-desc');
+    if (th.dataset.col === sortCol) {
+      th.classList.add(sortDir === 'asc' ? 'sort-asc' : 'sort-desc');
+    }
+  });
+}
 
-    document.getElementById('team-select').addEventListener('change', e => {
-      teamFilter = e.target.value;
-      dt.draw();
-    });
+// ── WIRE CONTROLS ─────────────────────────────────────────────────────────────
+document.querySelectorAll('.pill[data-filter]').forEach(pill => {
+  pill.addEventListener('click', () => {
+    const type = pill.dataset.filter;
+    document.querySelectorAll(`.pill[data-filter="${type}"]`).forEach(p => p.classList.remove('active'));
+    pill.classList.add('active');
+    filters[type] = pill.dataset.value;
+    expandedId = null;
+    render();
+  });
+});
 
-    document.getElementById('school-filter').addEventListener('input', e => {
-      schoolFilter = e.target.value.toLowerCase().trim();
-      dt.draw();
-    });
+document.getElementById('player-search').addEventListener('input', e => {
+  searchQuery = e.target.value.trim();
+  expandedId = null;
+  render();
+});
 
-    document.getElementById('player-search').addEventListener('input', e => {
-      dt.search(e.target.value).draw();
-    });
-  }
+document.querySelectorAll('thead th[data-col]').forEach(th => {
+  th.addEventListener('click', () => {
+    const col = th.dataset.col;
+    if (sortCol === col) {
+      sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+    } else {
+      sortCol = col;
+      sortDir = 'asc';
+    }
+    render();
+  });
+});
 
-  // ── Bootstrap ─────────────────────────────────────────────────────────────
-  // Wire static filters once; year pills manage their own listeners.
-  wireFilters();
-
-  // Initial load via reloadData() using default year selection (2026).
-  reloadData();
-  fetch('data/prospects_2026.json').then(r => r.json()).then(data => {
-      const hasMock = allProspects.some(p => p.round_source === 'mock') ||
-                      (data.prospects || []).some(p => p.round_source === 'mock');
-      if (!hasMock) document.getElementById('mock-banner').style.display = 'none';
-    })
-    .catch(err => {
-      document.getElementById('subtitle').textContent = 'Error loading data.';
-      console.error(err);
-    });
-}());
+render();
 </script>
 </body>
 </html>
